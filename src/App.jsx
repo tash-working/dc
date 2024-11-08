@@ -4,9 +4,9 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import io from "socket.io-client";
 
-// const socket = io("server-eight-sepia-51.vercel.app");
 // const socket = io("https://server-08ld.onrender.com");
-const socket = io(`server-eight-sepia-51.vercel.app`);
+// const socket = io("https://server-08ld.onrender.com");
+const socket = io(`https://server-08ld.onrender.com`);
 
 function App() {
   const [count, setCount] = useState(0)
@@ -51,7 +51,7 @@ function App() {
   }
   const getRecivedOrders = async () => {
     try {
-      const response = await fetch(`server-eight-sepia-51.vercel.app/getRecivedOrders`)
+      const response = await fetch(`https://server-08ld.onrender.com/getRecivedOrders`)
       const jsonData = await response.json();
       console.log(jsonData);
       setOrders(jsonData)
