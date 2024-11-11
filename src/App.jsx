@@ -60,12 +60,12 @@ function App() {
     const handleReciveOrder = (data) => {
       console.log(data);
 
-      const recivedOrders =
+      let recivedOrders =
         JSON.parse(localStorage.getItem(`recivedOrders`)) || [];
 
         
       recivedOrders.push(data);
-      recivedOrders = recivedOrders.slice().reverse()
+      // recivedOrders = recivedOrders.slice().reverse()
 
       setOrders(recivedOrders);
       localStorage.setItem("recivedOrders", JSON.stringify(recivedOrders));
