@@ -194,6 +194,21 @@ function Home() {
                           {order.status.charAt(0).toUpperCase() +
                             order.status.slice(1)}
                         </span>
+                        {
+                          order.status === "process"?(
+                            <button
+                            type="button"
+                            // onClick={closeModal}
+                            className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-400 text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                          >
+                            Cancel
+                          </button>
+                          )
+                          :(
+                            null
+                          )
+
+                        }
                       </div>
                     </div>
 
