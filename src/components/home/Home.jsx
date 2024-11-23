@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 import io from "socket.io-client";
 
-// const socket = io("https://server-08ld.onrender.com/");
-// const socket = io("https://server-08ld.onrender.com/");
-const socket = io(`https://server-08ld.onrender.com/`);
+// const socket = io("http://localhost:5000/");
+// const socket = io("http://localhost:5000/");
+const socket = io(`http://localhost:5000/`);
 
 function Home() {
   const [count, setCount] = useState(0);
@@ -23,6 +23,28 @@ function Home() {
     newOrders[index] = selectedOrder;
     console.log(newOrders);
     socket.emit("updateToPrepare", { id, status: "granted" });
+
+    localStorage.setItem("recivedOrders", JSON.stringify(newOrders));
+    setOrders(newOrders);
+  };
+  const canceltOrder = (index) => {
+    const orderCompleteTime = handleClick();
+
+    console.log(index);
+
+    const newOrders = [...orders];
+    console.log(newOrders[index]._id);
+    const id = newOrders[index]._id;
+    const selectedOrder = newOrders[index];
+    selectedOrder.status = "cancel";
+    newOrders[index] = selectedOrder;
+    newOrders[index].orderCompleteTime = orderCompleteTime;
+    console.log(newOrders);
+    socket.emit("updateToPrepare", {
+      id,
+      status: "cancel",
+      orderCompleteTime,
+    });
 
     localStorage.setItem("recivedOrders", JSON.stringify(newOrders));
     setOrders(newOrders);
@@ -71,9 +93,7 @@ function Home() {
   };
   const getRecivedOrders = async () => {
     try {
-      const response = await fetch(
-        `https://server-08ld.onrender.com/getRecivedOrders`
-      );
+      const response = await fetch(`http://localhost:5000/getRecivedOrders`);
       const jsonData = await response.json();
       console.log(jsonData);
       setOrders(jsonData);
@@ -100,11 +120,39 @@ function Home() {
       setOrders(recivedOrders);
       localStorage.setItem("recivedOrders", JSON.stringify(recivedOrders));
     };
+    const handleReciveReq = (data) => {
+      console.log(data);
+      setOrders((prevSentOrders) => {
+        const updatedSentOrders = [...prevSentOrders];
+        for (let i = 0; i < updatedSentOrders.length; i++) {
+          const order = updatedSentOrders[i];
+          if (order._id === data.id) {
+            order.req = data.req;
+            localStorage.setItem(
+              "recivedOrders",
+              JSON.stringify(updatedSentOrders)
+            );
+          }
+        }
+        return updatedSentOrders;
+      });
+
+      // let recivedOrders =
+      //   JSON.parse(localStorage.getItem(`recivedOrders`)) || [];
+
+      // recivedOrders.push(data);
+      // // recivedOrders = recivedOrders.slice().reverse()
+
+      // setOrders(recivedOrders);
+      // localStorage.setItem("recivedOrders", JSON.stringify(recivedOrders));
+    };
 
     socket.on("recive_order", handleReciveOrder);
+    socket.on("requested", handleReciveReq);
 
     return () => {
       socket.off("recive_order", handleReciveOrder);
+      socket.off("requested", handleReciveReq);
     };
   }, [socket]);
   // Add modal states
@@ -170,7 +218,7 @@ function Home() {
             .reverse()
             .map((order, index) => (
               <div key={index}>
-                {order.status !== "complete" ? (
+                {order.status !== "complete" && order.status !== "cancel" ? (
                   <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
                     {/* Status Banner */}
                     <div
@@ -194,21 +242,23 @@ function Home() {
                           {order.status.charAt(0).toUpperCase() +
                             order.status.slice(1)}
                         </span>
-                        {
-                          order.status === "process"?(
+                        {order.status === "process" ? (
+                          <div>
+                            {order.req && order.req === "cancel" ? (
+                              <p>Requested Cancel</p>
+                            ) : null}
                             <button
-                            type="button"
-                            // onClick={closeModal}
-                            className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-400 text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                          >
-                            Cancel
-                          </button>
-                          )
-                          :(
-                            null
-                          )
-
-                        }
+                              onClick={() =>
+                                canceltOrder(orders.length - index - 1)
+                              }
+                              type="button"
+                              // onClick={closeModal}
+                              className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-400 text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
 

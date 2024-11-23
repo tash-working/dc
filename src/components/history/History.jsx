@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 import io from "socket.io-client";
 
-// const socket = io("https://server-08ld.onrender.com/");
-// const socket = io("https://server-08ld.onrender.com/");
-const socket = io(`https://server-08ld.onrender.com/`);
+// const socket = io("http://localhost:5000/");
+// const socket = io("http://localhost:5000/");
+const socket = io(`http://localhost:5000/`);
 
 function History() {
   const [count, setCount] = useState(0);
@@ -14,7 +14,6 @@ function History() {
   const id = "cash";
   const grantOrder = (index) => {
     console.log(index);
-
 
     const newOrders = [...orders];
     console.log(newOrders[index]._id);
@@ -45,9 +44,7 @@ function History() {
   };
   const getRecivedOrders = async () => {
     try {
-      const response = await fetch(
-        `https://server-08ld.onrender.com/getRecivedOrders`
-      );
+      const response = await fetch(`http://localhost:5000/getRecivedOrders`);
       const jsonData = await response.json();
       console.log(jsonData);
       setOrders(jsonData);
@@ -67,7 +64,6 @@ function History() {
 
       let recivedOrders =
         JSON.parse(localStorage.getItem(`recivedOrders`)) || [];
-
 
       recivedOrders.push(data);
       // recivedOrders = recivedOrders.slice().reverse()
@@ -99,10 +95,17 @@ function History() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex space-x-8">
               <Link to="/" className="py-4 px-1">
-                <span className="text-sm font-medium text-gray-500 hover:text-gray-700">Orders</span>
+                <span className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                  Orders
+                </span>
               </Link>
-              <Link to="/History" className="border-b-2 border-indigo-500 py-4 px-1">
-                <span className="text-sm font-medium text-indigo-600">History</span>
+              <Link
+                to="/History"
+                className="border-b-2 border-indigo-500 py-4 px-1"
+              >
+                <span className="text-sm font-medium text-indigo-600">
+                  History
+                </span>
               </Link>
             </div>
           </div>
@@ -110,11 +113,12 @@ function History() {
 
         {/* Orders Grid */}
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-
-          {orders.slice().reverse().map((order, index) => (
-            <div>
-              {
-                order.status === "complete" ? (
+          {orders
+            .slice()
+            .reverse()
+            .map((order, index) => (
+              <div>
+                {order.status === "complete" || order.status === "cancel" ? (
                   <div
                     key={index}
                     className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
@@ -122,12 +126,13 @@ function History() {
                     {/* Status Banner */}
                     <div
                       className={`px-6 py-3 rounded-t-xl text-sm font-medium
-                ${order.status === "process"
-                          ? "bg-yellow-50 text-yellow-700 border-b border-yellow-100"
-                          : order.status === "granted"
-                            ? "bg-blue-50 text-blue-700 border-b border-blue-100"
-                            : "bg-green-50 text-green-700 border-b border-green-100"
-                        }`}
+                ${
+                  order.status === "process"
+                    ? "bg-yellow-50 text-yellow-700 border-b border-yellow-100"
+                    : order.status === "granted"
+                    ? "bg-blue-50 text-blue-700 border-b border-blue-100"
+                    : "bg-green-50 text-green-700 border-b border-green-100"
+                }`}
                     >
                       <div className="flex items-center justify-between">
                         <span>Order #{order._id.slice(-6)}</span>
@@ -135,9 +140,12 @@ function History() {
                           {order.status === "process"
                             ? "🕒"
                             : order.status === "granted"
-                              ? "👨‍🍳"
-                              : "✅"}
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            ? "👨‍🍳"
+                            : order.status === "cancel"
+                            ? "❌"
+                            : "✅"}
+                          {order.status.charAt(0).toUpperCase() +
+                            order.status.slice(1)}
                         </span>
                       </div>
                     </div>
@@ -165,8 +173,8 @@ function History() {
                           />
                         </svg>
                         <p className="text-sm">
-                          House {order.house}, Road {order.road}, Sector {order.sector},
-                          Uttara
+                          House {order.house}, Road {order.road}, Sector{" "}
+                          {order.sector}, Uttara
                         </p>
                       </div>
                       <div className="mt-3 flex items-center space-x-3 text-gray-700">
@@ -183,19 +191,55 @@ function History() {
                             d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                           />
                         </svg>
-                        <p className="text-sm font-medium">{order.phoneNumber}</p>
+                        <p className="text-sm font-medium">
+                          {order.phoneNumber}
+                        </p>
                       </div>
                       <div className="mt-3 flex items-center space-x-3 text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="2"
+                          stroke="currentColor"
+                          class="w-6 h-6"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
                         </svg>
-                        <p className="text-sm font-medium">Order time: {order.date_time}</p>
+                        <p className="text-sm font-medium">
+                          Order time: {order.date_time}
+                        </p>
                       </div>
                       <div className="mt-3 flex items-center space-x-3 text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="2"
+                          stroke="currentColor"
+                          class="w-6 h-6"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
                         </svg>
-                        <p className="text-sm font-medium">Order complete time: {order.orderCompleteTime}</p>
+                        <p className="text-sm font-medium">
+                          {order.status === "complete" ? (
+                            <p>
+                              Order complete time: {order.orderCompleteTime}
+                            </p>
+                          ) : (
+                            <p>
+                              Order cancel time: {order.orderCompleteTime}
+                            </p>
+                          )}
+                        </p>
                       </div>
                     </div>
 
@@ -207,7 +251,9 @@ function History() {
                           className="flex items-center justify-between p-3 rounded-lg bg-gray-50"
                         >
                           <div className="flex-1">
-                            <h3 className="font-medium text-gray-900">{item.name}</h3>
+                            <h3 className="font-medium text-gray-900">
+                              {item.name}
+                            </h3>
                             <div className="mt-1 flex items-center space-x-2">
                               <span className="text-sm text-gray-600">
                                 {item.edited
@@ -233,12 +279,24 @@ function History() {
                       <p>Vat - 5.00%: {order.price * 0.05}৳</p>
                       <p>Auto Round: {Math.round(order.price * 0.05)}৳</p>
                       <hr></hr>
-                      <p>Gross Total: {order.price + Math.round(order.price * 0.05)}৳</p>
+                      <p>
+                        Gross Total:{" "}
+                        {order.price + Math.round(order.price * 0.05)}৳
+                      </p>
                     </div>
 
                     {/* Action Footer */}
                     <div className="px-6 py-4 bg-gray-50 rounded-b-xl">
-                      {order.status === "process" ? (
+                    {order.status === "complete" ? (
+                             <div className="text-center text-green-600 font-medium">
+                             ✨ Order Completed
+                           </div>
+                          ) : (
+                            <div className="text-center text-green-600 font-medium">
+                            ❌ Order Canceled
+                          </div>
+                          )}
+                      {/* {order.status === "process" ? (
                         <button
                           onClick={() => grantOrder(orders.length - index - 1)}
                           className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white 
@@ -249,7 +307,9 @@ function History() {
                         </button>
                       ) : order.status === "granted" ? (
                         <button
-                          onClick={() => completeOrder(orders.length - index - 1)}
+                          onClick={() =>
+                            completeOrder(orders.length - index - 1)
+                          }
                           className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white 
                              py-2 px-4 rounded-lg hover:from-green-700 hover:to-green-800 
                              transition duration-200 font-medium"
@@ -260,16 +320,12 @@ function History() {
                         <div className="text-center text-green-600 font-medium">
                           ✨ Order Completed
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </div>
-                ) : (
-                  null
-                )
-              }
-            </div>
-
-          ))}
+                ) : null}
+              </div>
+            ))}
         </div>
       </div>
     </div>
