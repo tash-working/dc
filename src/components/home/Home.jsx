@@ -178,8 +178,10 @@ function Home() {
   const handleConfirm = () => {
     if (modalType === "accept") {
       grantOrder(selectedOrderIndex);
-    } else {
+    } else if (modalType === "complete") {
       completeOrder(selectedOrderIndex);
+    } else if (modalType === "cancel") {
+      canceltOrder(selectedOrderIndex);
     }
     closeModal();
   };
@@ -251,10 +253,9 @@ function Home() {
                             ) : null}
                             <button
                               onClick={() =>
-                                canceltOrder(orders.length - index - 1)
+                                openModal("cancel", orders.length - index - 1)
                               }
                               type="button"
-                              // onClick={closeModal}
                               className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-400 text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                             >
                               Cancel
@@ -446,7 +447,9 @@ function Home() {
                                     className={`flex h-12 w-12 items-center justify-center rounded-full ${
                                       modalType === "accept"
                                         ? "bg-blue-100"
-                                        : "bg-green-100"
+                                        : modalType === "complete"
+                                        ? "bg-green-100"
+                                        : "bg-red-100"
                                     }`}
                                   >
                                     {modalType === "accept" ? (
@@ -463,7 +466,7 @@ function Home() {
                                           d="M5 13l4 4L19 7"
                                         />
                                       </svg>
-                                    ) : (
+                                    ) : modalType === "complete" ? (
                                       <svg
                                         className="h-6 w-6 text-green-600"
                                         fill="none"
@@ -477,14 +480,26 @@ function Home() {
                                           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                         />
                                       </svg>
+                                    ) : (
+                                      <svg
+                                        className="h-6 w-6 text-red-600"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                      </svg>
                                     )}
                                   </div>
                                   <div className="ml-4">
                                     <h3 className="text-lg font-medium text-gray-900">
                                       {modalType === "accept"
                                         ? "Accept Order"
-                                        : "Complete Order"}
+                                        : modalType === "complete"
+                                        ? "Complete Order"
+                                        : "Cancel Order"}
                                     </h3>
+
                                     <p className="mt-1 text-sm text-gray-500">
                                       Order #
                                       {orders[selectedOrderIndex]?._id.slice(
@@ -629,14 +644,18 @@ function Home() {
                                   type="button"
                                   onClick={handleConfirm}
                                   className={`w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent 
-                                            px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none sm:text-sm
-                                            ${
-                                              modalType === "accept"
-                                                ? "bg-blue-600 hover:bg-blue-700"
-                                                : "bg-green-600 hover:bg-green-700"
-                                            }`}
+              px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none sm:text-sm
+              ${
+                modalType === "accept"
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : modalType === "complete"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
+              }`}
                                 >
-                                  Confirm
+                                  {modalType === "cancel"
+                                    ? "Confirm Cancellation"
+                                    : "Confirm"}
                                 </button>
                               </div>
                             </div>
