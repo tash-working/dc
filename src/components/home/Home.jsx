@@ -138,7 +138,6 @@ function Home() {
         }
         return updatedSentOrders;
       });
-      
 
       // let recivedOrders =
       //   JSON.parse(localStorage.getItem(`recivedOrders`)) || [];
@@ -239,13 +238,15 @@ function Home() {
                       <div className="flex items-center justify-between">
                         <span>Order #{order._id.slice(-6)}</span>
                         <span className="inline-flex items-center">
-                          {order.status === "process"
-                            ? "🕒"
-                            : order.status === "granted"
-                            ? "👨‍🍳"
-                            : "✅"}
-                          {order.status.charAt(0).toUpperCase() +
-                            order.status.slice(1)}
+                          {{
+                            process: "🕒 Processing",
+                            granted: "👨‍🍳 Granted",
+                            cancel: "❌ Canceled",
+                            default: "✅ Completed",
+                          }[order.status] || (
+                            // Fallback for unexpected status values
+                            <span>Unknown Status</span>
+                          )}
                         </span>
                         {order.status === "process" ? (
                           <div>
