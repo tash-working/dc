@@ -400,127 +400,134 @@ function Home() {
                         </div>
                       )}
 
-                      {/* Confirmation Modal */}
+                      {/* Confirmation Modal */}                 
                       {isModalOpen && (
-                        <div
-                          className="fixed inset-0 z-50 overflow-y-auto"
-                          aria-labelledby="modal-title"
-                          role="dialog"
-                          aria-modal="true"
-                        >
-                          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                            <div
-                              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                              aria-hidden="true"
-                              onClick={closeModal}
-                            ></div>
-
-                            <span
-                              className="hidden sm:inline-block sm:align-middle sm:h-screen"
-                              aria-hidden="true"
-                            >
-                              &#8203;
-                            </span>
-
-                            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                              <div className="absolute top-0 right-0 pt-4 pr-4">
-                                <button
-                                  onClick={closeModal}
-                                  className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                                >
-                                  <span className="sr-only">Close</span>
-                                  <svg
-                                    className="h-6 w-6"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth="2"
-                                      d="M6 18L18 6M6 6l12 12"
-                                    />
-                                  </svg>
-                                </button>
-                              </div>
-
-                              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                                <div className="sm:flex sm:items-start">
-                                  <div
-                                    className={`mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full sm:mx-0 sm:h-10 sm:w-10 ${
-                                      modalType === "accept"
-                                        ? "bg-blue-100"
-                                        : "bg-green-100"
-                                    }`}
-                                  >
+                        <div className="fixed inset-0 z-50 overflow-y-auto" aria-modal="true">
+                          {/* Overlay */}
+                          <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
+                                 onClick={closeModal} aria-hidden="true" />
+                      
+                            {/* Modal Content */}
+                            <div className="inline-block w-full max-w-xl transform overflow-hidden rounded-2xl bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:align-middle">
+                              {/* Close Button */}
+                              <button onClick={closeModal} 
+                                      className="absolute right-4 top-4 text-gray-400 hover:text-gray-500">
+                                <span className="sr-only">Close</span>
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                      
+                              {/* Header Section */}
+                              <div className="px-6 pt-6 pb-4">
+                                <div className="flex items-start">
+                                  <div className={`flex h-12 w-12 items-center justify-center rounded-full ${
+                                    modalType === "accept" ? "bg-blue-100" : "bg-green-100"
+                                  }`}>
                                     {modalType === "accept" ? (
-                                      <svg
-                                        className="h-6 w-6 text-blue-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth="2"
-                                          d="M5 13l4 4L19 7"
-                                        />
+                                      <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                       </svg>
                                     ) : (
-                                      <svg
-                                        className="h-6 w-6 text-green-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth="2"
-                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
+                                      <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                       </svg>
                                     )}
                                   </div>
-                                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                    <h3
-                                      className="text-lg leading-6 font-medium text-gray-900"
-                                      id="modal-title"
-                                    >
-                                      {modalType === "accept"
-                                        ? "Accept Order"
-                                        : "Complete Order"}
+                                  <div className="ml-4">
+                                    <h3 className="text-lg font-medium text-gray-900">
+                                      {modalType === "accept" ? "Accept Order" : "Complete Order"}
                                     </h3>
-                                    <div className="mt-2">
-                                      <p className="text-sm text-gray-500">
-                                        {modalType === "accept"
-                                          ? "Are you sure you want to accept this order? This action cannot be undone."
-                                          : "Are you sure you want to mark this order as complete? This action cannot be undone."}
-                                      </p>
-                                    </div>
+                                    <p className="mt-1 text-sm text-gray-500">Order #{orders[selectedOrderIndex]?._id.slice(-6)}</p>
                                   </div>
                                 </div>
                               </div>
-                              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                                <button
-                                  type="button"
-                                  onClick={handleConfirm}
-                                  className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none sm:ml-3 sm:w-auto sm:text-sm ${
-                                    modalType === "accept"
-                                      ? "bg-blue-600 hover:bg-blue-700"
-                                      : "bg-green-600 hover:bg-green-700"
-                                  }`}
-                                >
-                                  Confirm
-                                </button>
+                      
+                              {/* Order Details Section */}
+                              <div className="max-h-[60vh] overflow-y-auto px-6 py-4">
+                                {/* Customer Info */}
+                                <div className="rounded-lg bg-gray-50 p-4 mb-4">
+                                  <h4 className="text-sm font-medium text-gray-900 mb-3">Customer Details</h4>
+                                  <div className="space-y-2">
+                                    <div className="flex items-center text-sm text-gray-600">
+                                      <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                      </svg>
+                                      {orders[selectedOrderIndex]?.phoneNumber}
+                                    </div>
+                                    <div className="flex items-center text-sm text-gray-600">
+                                      <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      </svg>
+                                      House {orders[selectedOrderIndex]?.house}, Road {orders[selectedOrderIndex]?.road}, 
+                                      Sector {orders[selectedOrderIndex]?.sector}, Uttara
+                                    </div>
+                                  </div>
+                                </div>
+                      
+                                {/* Order Items */}
+                                <div className="space-y-3">
+                                  <h4 className="text-sm font-medium text-gray-900">Order Items</h4>
+                                  {orders[selectedOrderIndex]?.orders.map((item, idx) => (
+                                    <div key={idx} className="flex justify-between p-3 bg-gray-50 rounded-lg">
+                                      <div>
+                                        <p className="font-medium text-gray-900">{item.name}</p>
+                                        <p className="text-sm text-gray-500">
+                                          {item.edited ? item.selectedSize || item.size[0].size : item.size[0].size} 
+                                          • Qty: {item.quantity}
+                                        </p>
+                                      </div>
+                                      <p className="font-medium text-gray-900">৳{item.price * item.quantity}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                      
+                                {/* Total Section */}
+                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm text-gray-600">Net Total</span>
+                                    <span className="font-medium">৳{orders[selectedOrderIndex]?.price}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm text-gray-600">VAT (5%)</span>
+                                    <span className="text-sm">৳{Math.round(orders[selectedOrderIndex]?.price * 0.05)}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center font-medium text-lg">
+                                    <span>Total Amount</span>
+                                    <span>৳{orders[selectedOrderIndex]?.price + 
+                                           Math.round(orders[selectedOrderIndex]?.price * 0.05)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                      
+                              {/* Action Buttons */}
+                              <div className="bg-gray-50 px-6 py-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
                                 <button
                                   type="button"
                                   onClick={closeModal}
-                                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                  className="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 
+                                           bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 
+                                           focus:outline-none sm:text-sm"
                                 >
                                   Cancel
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleConfirm}
+                                  className={`w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent 
+                                            px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none sm:text-sm
+                                            ${modalType === "accept" 
+                                              ? "bg-blue-600 hover:bg-blue-700" 
+                                              : "bg-green-600 hover:bg-green-700"
+                                            }`}
+                                >
+                                  Confirm
                                 </button>
                               </div>
                             </div>
