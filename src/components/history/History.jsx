@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 import io from "socket.io-client";
 
-// const socket = io("http://localhost:5000/");
-// const socket = io("http://localhost:5000/");
-const socket = io(`http://localhost:5000/`);
+// const socket = io("https://server-08ld.onrender.com/");
+// const socket = io("https://server-08ld.onrender.com/");
+const socket = io(`https://server-08ld.onrender.com/`);
 
 function History() {
   const [count, setCount] = useState(0);
@@ -44,7 +44,9 @@ function History() {
   };
   const getRecivedOrders = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/getRecivedOrders`);
+      const response = await fetch(
+        `https://server-08ld.onrender.com/getRecivedOrders`
+      );
       const jsonData = await response.json();
       console.log(jsonData);
       setOrders(jsonData);
@@ -235,9 +237,7 @@ function History() {
                               Order complete time: {order.orderCompleteTime}
                             </p>
                           ) : (
-                            <p>
-                              Order cancel time: {order.orderCompleteTime}
-                            </p>
+                            <p>Order cancel time: {order.orderCompleteTime}</p>
                           )}
                         </p>
                       </div>
@@ -287,15 +287,15 @@ function History() {
 
                     {/* Action Footer */}
                     <div className="px-6 py-4 bg-gray-50 rounded-b-xl">
-                    {order.status === "complete" ? (
-                             <div className="text-center text-green-600 font-medium">
-                             ✨ Order Completed
-                           </div>
-                          ) : (
-                            <div className="text-center text-green-600 font-medium">
-                            ❌ Order Canceled
-                          </div>
-                          )}
+                      {order.status === "complete" ? (
+                        <div className="text-center text-green-600 font-medium">
+                          ✨ Order Completed
+                        </div>
+                      ) : (
+                        <div className="text-center text-green-600 font-medium">
+                          ❌ Order Canceled
+                        </div>
+                      )}
                       {/* {order.status === "process" ? (
                         <button
                           onClick={() => grantOrder(orders.length - index - 1)}

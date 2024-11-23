@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 import io from "socket.io-client";
 
-// const socket = io("http://localhost:5000/");
-// const socket = io("http://localhost:5000/");
-const socket = io(`http://localhost:5000/`);
+// const socket = io("https://server-08ld.onrender.com/");
+// const socket = io("https://server-08ld.onrender.com/");
+const socket = io(`https://server-08ld.onrender.com/`);
 
 function Home() {
   const [count, setCount] = useState(0);
@@ -93,7 +93,9 @@ function Home() {
   };
   const getRecivedOrders = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/getRecivedOrders`);
+      const response = await fetch(
+        `https://server-08ld.onrender.com/getRecivedOrders`
+      );
       const jsonData = await response.json();
       console.log(jsonData);
       setOrders(jsonData);
@@ -400,112 +402,218 @@ function Home() {
                         </div>
                       )}
 
-                      {/* Confirmation Modal */}                 
+                      {/* Confirmation Modal */}
                       {isModalOpen && (
-                        <div className="fixed inset-0 z-50 overflow-y-auto" aria-modal="true">
+                        <div
+                          className="fixed inset-0 z-50 overflow-y-auto"
+                          aria-modal="true"
+                        >
                           {/* Overlay */}
                           <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
-                                 onClick={closeModal} aria-hidden="true" />
-                      
+                            <div
+                              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                              onClick={closeModal}
+                              aria-hidden="true"
+                            />
+
                             {/* Modal Content */}
                             <div className="inline-block w-full max-w-xl transform overflow-hidden rounded-2xl bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:align-middle">
                               {/* Close Button */}
-                              <button onClick={closeModal} 
-                                      className="absolute right-4 top-4 text-gray-400 hover:text-gray-500">
+                              <button
+                                onClick={closeModal}
+                                className="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
+                              >
                                 <span className="sr-only">Close</span>
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                <svg
+                                  className="h-6 w-6"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                  />
                                 </svg>
                               </button>
-                      
+
                               {/* Header Section */}
                               <div className="px-6 pt-6 pb-4">
                                 <div className="flex items-start">
-                                  <div className={`flex h-12 w-12 items-center justify-center rounded-full ${
-                                    modalType === "accept" ? "bg-blue-100" : "bg-green-100"
-                                  }`}>
+                                  <div
+                                    className={`flex h-12 w-12 items-center justify-center rounded-full ${
+                                      modalType === "accept"
+                                        ? "bg-blue-100"
+                                        : "bg-green-100"
+                                    }`}
+                                  >
                                     {modalType === "accept" ? (
-                                      <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                      <svg
+                                        className="h-6 w-6 text-blue-600"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth="2"
+                                          d="M5 13l4 4L19 7"
+                                        />
                                       </svg>
                                     ) : (
-                                      <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                      <svg
+                                        className="h-6 w-6 text-green-600"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth="2"
+                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
                                       </svg>
                                     )}
                                   </div>
                                   <div className="ml-4">
                                     <h3 className="text-lg font-medium text-gray-900">
-                                      {modalType === "accept" ? "Accept Order" : "Complete Order"}
+                                      {modalType === "accept"
+                                        ? "Accept Order"
+                                        : "Complete Order"}
                                     </h3>
-                                    <p className="mt-1 text-sm text-gray-500">Order #{orders[selectedOrderIndex]?._id.slice(-6)}</p>
+                                    <p className="mt-1 text-sm text-gray-500">
+                                      Order #
+                                      {orders[selectedOrderIndex]?._id.slice(
+                                        -6
+                                      )}
+                                    </p>
                                   </div>
                                 </div>
                               </div>
-                      
+
                               {/* Order Details Section */}
                               <div className="max-h-[60vh] overflow-y-auto px-6 py-4">
                                 {/* Customer Info */}
                                 <div className="rounded-lg bg-gray-50 p-4 mb-4">
-                                  <h4 className="text-sm font-medium text-gray-900 mb-3">Customer Details</h4>
+                                  <h4 className="text-sm font-medium text-gray-900 mb-3">
+                                    Customer Details
+                                  </h4>
                                   <div className="space-y-2">
                                     <div className="flex items-center text-sm text-gray-600">
-                                      <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                                              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                      <svg
+                                        className="h-5 w-5 mr-2"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth="2"
+                                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                        />
                                       </svg>
                                       {orders[selectedOrderIndex]?.phoneNumber}
                                     </div>
                                     <div className="flex items-center text-sm text-gray-600">
-                                      <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      <svg
+                                        className="h-5 w-5 mr-2"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth="2"
+                                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                        />
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth="2"
+                                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
                                       </svg>
-                                      House {orders[selectedOrderIndex]?.house}, Road {orders[selectedOrderIndex]?.road}, 
-                                      Sector {orders[selectedOrderIndex]?.sector}, Uttara
+                                      House {orders[selectedOrderIndex]?.house},
+                                      Road {orders[selectedOrderIndex]?.road},
+                                      Sector{" "}
+                                      {orders[selectedOrderIndex]?.sector},
+                                      Uttara
                                     </div>
                                   </div>
                                 </div>
-                      
+
                                 {/* Order Items */}
                                 <div className="space-y-3">
-                                  <h4 className="text-sm font-medium text-gray-900">Order Items</h4>
-                                  {orders[selectedOrderIndex]?.orders.map((item, idx) => (
-                                    <div key={idx} className="flex justify-between p-3 bg-gray-50 rounded-lg">
-                                      <div>
-                                        <p className="font-medium text-gray-900">{item.name}</p>
-                                        <p className="text-sm text-gray-500">
-                                          {item.edited ? item.selectedSize || item.size[0].size : item.size[0].size} 
-                                          • Qty: {item.quantity}
+                                  <h4 className="text-sm font-medium text-gray-900">
+                                    Order Items
+                                  </h4>
+                                  {orders[selectedOrderIndex]?.orders.map(
+                                    (item, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="flex justify-between p-3 bg-gray-50 rounded-lg"
+                                      >
+                                        <div>
+                                          <p className="font-medium text-gray-900">
+                                            {item.name}
+                                          </p>
+                                          <p className="text-sm text-gray-500">
+                                            {item.edited
+                                              ? item.selectedSize ||
+                                                item.size[0].size
+                                              : item.size[0].size}
+                                            • Qty: {item.quantity}
+                                          </p>
+                                        </div>
+                                        <p className="font-medium text-gray-900">
+                                          ৳{item.price * item.quantity}
                                         </p>
                                       </div>
-                                      <p className="font-medium text-gray-900">৳{item.price * item.quantity}</p>
-                                    </div>
-                                  ))}
+                                    )
+                                  )}
                                 </div>
-                      
+
                                 {/* Total Section */}
                                 <div className="mt-4 pt-4 border-t border-gray-200">
                                   <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm text-gray-600">Net Total</span>
-                                    <span className="font-medium">৳{orders[selectedOrderIndex]?.price}</span>
+                                    <span className="text-sm text-gray-600">
+                                      Net Total
+                                    </span>
+                                    <span className="font-medium">
+                                      ৳{orders[selectedOrderIndex]?.price}
+                                    </span>
                                   </div>
                                   <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm text-gray-600">VAT (5%)</span>
-                                    <span className="text-sm">৳{Math.round(orders[selectedOrderIndex]?.price * 0.05)}</span>
+                                    <span className="text-sm text-gray-600">
+                                      VAT (5%)
+                                    </span>
+                                    <span className="text-sm">
+                                      ৳
+                                      {Math.round(
+                                        orders[selectedOrderIndex]?.price * 0.05
+                                      )}
+                                    </span>
                                   </div>
                                   <div className="flex justify-between items-center font-medium text-lg">
                                     <span>Total Amount</span>
-                                    <span>৳{orders[selectedOrderIndex]?.price + 
-                                           Math.round(orders[selectedOrderIndex]?.price * 0.05)}</span>
+                                    <span>
+                                      ৳
+                                      {orders[selectedOrderIndex]?.price +
+                                        Math.round(
+                                          orders[selectedOrderIndex]?.price *
+                                            0.05
+                                        )}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
-                      
+
                               {/* Action Buttons */}
                               <div className="bg-gray-50 px-6 py-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
                                 <button
@@ -522,9 +630,10 @@ function Home() {
                                   onClick={handleConfirm}
                                   className={`w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent 
                                             px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none sm:text-sm
-                                            ${modalType === "accept" 
-                                              ? "bg-blue-600 hover:bg-blue-700" 
-                                              : "bg-green-600 hover:bg-green-700"
+                                            ${
+                                              modalType === "accept"
+                                                ? "bg-blue-600 hover:bg-blue-700"
+                                                : "bg-green-600 hover:bg-green-700"
                                             }`}
                                 >
                                   Confirm
