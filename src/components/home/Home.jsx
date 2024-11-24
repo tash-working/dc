@@ -10,8 +10,17 @@ const socket = io(`https://server-08ld.onrender.com/`);
 function Home() {
   const [count, setCount] = useState(0);
   const [orders, setOrders] = useState([]);
+  const [permission, setPermission] = useState(null);
+
 
   const id = "cash";
+//   const allowNoti =()=>{
+//     console.log("ask permission");
+//     Notification.requestPermission().then(result => {
+// alert(result);      
+//     })
+    
+//   }
   const grantOrder = (index) => {
     console.log(index);
 
@@ -105,12 +114,34 @@ function Home() {
     }
   };
 
+
+  const showNotification = (data) => {
+    if (Notification.permission === 'granted') {
+      new Notification('New Order', {
+        body: `Order ID: ${data._id}`,
+        icon: '/path/to/your/icon.png' // Optional icon
+      });
+    } else {
+      alert('Please allow notifications.');
+    }
+  };
+
+
   useEffect(() => {
+    const requestPermission = async () => {
+      const permission = await Notification.requestPermission();
+      setPermission(permission);
+    };
+
+    if (Notification.permission !== 'denied') {
+      requestPermission();
+    }
     // const recivedOrders = JSON.parse(localStorage.getItem(`recivedOrders`)) || [];
     // setOrders(recivedOrders)
     getRecivedOrders();
 
     const handleReciveOrder = (data) => {
+      showNotification(data)
       console.log(data);
 
       let recivedOrders =
@@ -211,6 +242,13 @@ function Home() {
                   History
                 </span>
               </Link>
+              {
+                permission === 'granted'?(
+                  <p>Allowed Notification</p>
+                ):(
+                  <p>Please Allow notification</p>
+                )
+              }
             </div>
           </div>
         </nav>
