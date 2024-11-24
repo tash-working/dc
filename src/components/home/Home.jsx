@@ -119,8 +119,19 @@ function Home() {
     if (Notification.permission === 'granted') {
       new Notification('New Order', {
         body: `Order ID: ${data._id}`,
-        icon: '/path/to/your/icon.png' // Optional icon
+       icon: 'logo.png' // Optional icon
       });
+    } else {
+      alert('Please allow notifications.');
+    }
+  };
+  const showCancelNotification = (data) => {
+    if (Notification.permission === 'granted') {
+      new Notification('Order Cancel Requested', {
+        body: `Order ID: ${data.id}`,
+        icon: 'logo.png' // Optional icon
+      });
+      
     } else {
       alert('Please allow notifications.');
     }
@@ -154,6 +165,7 @@ function Home() {
       localStorage.setItem("recivedOrders", JSON.stringify(recivedOrders));
     };
     const handleReciveReq = (data) => {
+      showCancelNotification(data)
       console.log(data);
       setOrders((prevSentOrders) => {
         const updatedSentOrders = [...prevSentOrders];
@@ -287,11 +299,15 @@ function Home() {
                           )}
                         </span>
                         {order.status === "process" ? (
+                          
                           <div>
                             {order.req && order.req === "cancel" ? (
-                              <p>Requested Cancel</p>
-                            ) : null}
-                            <button
+                        <div>
+                            <span class="relative flex h-3 w-3">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        </span>
+                        <button
                               onClick={() =>
                                 openModal("cancel", orders.length - index - 1)
                               }
@@ -300,6 +316,18 @@ function Home() {
                             >
                               Cancel
                             </button>
+                        </div>
+                        
+                            ) : <button
+                            onClick={() =>
+                              openModal("cancel", orders.length - index - 1)
+                            }
+                            type="button"
+                            className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-400 text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                          >
+                            Cancel
+                          </button>}
+                            
                           </div>
                         ) : null}
                       </div>
