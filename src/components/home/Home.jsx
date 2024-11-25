@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import io from "socket.io-client";
+import Nav from "../nav/Nav";
 
 // const socket = io("https://server-08ld.onrender.com/");
 // const socket = io("https://server-08ld.onrender.com/");
@@ -10,17 +11,9 @@ const socket = io(`https://server-08ld.onrender.com/`);
 function Home() {
   const [count, setCount] = useState(0);
   const [orders, setOrders] = useState([]);
+  const [selection, setSelection] = useState("home");
   const [permission, setPermission] = useState(null);
 
-
-  const id = "cash";
-//   const allowNoti =()=>{
-//     console.log("ask permission");
-//     Notification.requestPermission().then(result => {
-// alert(result);      
-//     })
-    
-//   }
   const grantOrder = (index) => {
     console.log(index);
 
@@ -114,29 +107,82 @@ function Home() {
     }
   };
 
-
   const showNotification = (data) => {
-    if (Notification.permission === 'granted') {
-      new Notification('New Order', {
+    if (Notification.permission === "granted") {
+      const notification = new Notification("New Order", {
         body: `Order ID: ${data._id}`,
-       icon: 'logo.png' // Optional icon
+        icon: "logo.png",
+        sound: "notification.mp3", // Optional sound file
       });
+
+      notification.onclick = () => {
+        // Replace with your desired link
+        const desiredUrl = "http://localhost:5174";
+
+        // Open the URL in a new tab (or focus on existing tab)
+        window.open(desiredUrl);
+      };
+
+      setTimeout(() => {
+        notification.close();
+      }, 5000); // Dismiss notification after 5 seconds
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.ready
+          .then((registration) => {
+            registration.showNotification("New Order", {
+              body: `Order ID: ${data._id}`,
+              icon: "logo.png",
+            });
+          })
+          .catch((error) => {
+            console.error("Error registering service worker:", error);
+          });
+      }
     } else {
-      alert('Please allow notifications.');
-    }
-  };
-  const showCancelNotification = (data) => {
-    if (Notification.permission === 'granted') {
-      new Notification('Order Cancel Requested', {
-        body: `Order ID: ${data.id}`,
-        icon: 'logo.png' // Optional icon
-      });
-      
-    } else {
-      alert('Please allow notifications.');
+      Notification.requestPermission()
+        .then((permission) => {
+          if (permission === "granted") {
+            showNotification(data);
+          } else {
+            alert("Please allow notifications.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error requesting notification permission:", error);
+        });
     }
   };
 
+  const showCancelNotification = (data) => {
+    if (Notification.permission === "granted") {
+      // Create a Notification instance
+      const notification = new Notification("Order Cancel Requested", {
+        body: `Order ID: ${data.id}`,
+        icon: "logo.png", // Optional icon
+      });
+
+      // Handle clicks on the notification
+      notification.onclick = () => {
+        // Replace with your desired link
+        const desiredUrl = "http://localhost:5174";
+
+        // Open the URL in a new tab (or focus on existing tab)
+        window.open(desiredUrl);
+      };
+      // For Android devices, consider using a service worker to handle background notifications
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.showNotification("Order Cancel Requested", {
+            body: `Order ID: ${data.id}`,
+            icon: "logo.png",
+          });
+        });
+      }
+    } else {
+      alert("Please allow notifications.");
+    }
+  };
 
   useEffect(() => {
     const requestPermission = async () => {
@@ -144,7 +190,7 @@ function Home() {
       setPermission(permission);
     };
 
-    if (Notification.permission !== 'denied') {
+    if (Notification.permission !== "denied") {
       requestPermission();
     }
     // const recivedOrders = JSON.parse(localStorage.getItem(`recivedOrders`)) || [];
@@ -152,7 +198,7 @@ function Home() {
     getRecivedOrders();
 
     const handleReciveOrder = (data) => {
-      showNotification(data)
+      showNotification(data);
       console.log(data);
 
       let recivedOrders =
@@ -165,7 +211,7 @@ function Home() {
       localStorage.setItem("recivedOrders", JSON.stringify(recivedOrders));
     };
     const handleReciveReq = (data) => {
-      showCancelNotification(data)
+      showCancelNotification(data);
       console.log(data);
       setOrders((prevSentOrders) => {
         const updatedSentOrders = [...prevSentOrders];
@@ -232,51 +278,61 @@ function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Header */}
-        <header className="mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 text-center">
-            Order Management
-          </h1>
-          <p className="mt-2 text-center text-gray-600">
-            Real-time order tracking and management
-          </p>
-        </header>
-        <nav className="border-b bg-white">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex space-x-8">
-              <Link to="/" className="border-b-2 border-indigo-500 py-4 px-1">
-                <span className="text-sm font-medium text-indigo-600">
-                  Orders
-                </span>
-              </Link>
-              <Link to="/History" className="py-4 px-1">
-                <span className="text-sm font-medium text-gray-500 hover:text-gray-700">
-                  History
-                </span>
-              </Link>
-              {
-                permission === 'granted'?(
-                  <p>Allowed Notification</p>
-                ):(
-                  <p>Please Allow notification</p>
-                )
-              }
-            </div>
-          </div>
-        </nav>
+        <div>
+          <header className="mb-10">
+            <h1 className="text-4xl font-bold text-gray-900 text-center">
+              Order Management
+            </h1>
+            <p className="mt-2 text-center text-gray-600">
+              Real-time order tracking and management
+            </p>
+          </header>
+          <nav className="border-b bg-white">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="flex space-x-8">
+                <div
+                  onClick={() => setSelection("home")}
+                  className={`border-b-2 py-4 px-1 cursor-pointer ${
+                    selection === "home"
+                      ? "border-indigo-500 text-indigo-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  <span className="text-sm font-medium">Orders</span>
+                </div>
+                <div
+                  onClick={() => setSelection("history")}
+                  className={`py-4 px-1 cursor-pointer ${
+                    selection === "history"
+                      ? "border-b-2 border-indigo-500 text-indigo-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  <span className="text-sm font-medium">History</span>
+                </div>
 
-        {/* Orders Grid */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {orders
-            .slice()
-            .reverse()
-            .map((order, index) => (
-              <div key={index}>
-                {order.status !== "complete" && order.status !== "cancel" ? (
-                  <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
-                    {/* Status Banner */}
-                    <div
-                      className={`px-6 py-3 rounded-t-xl text-sm font-medium
+                {permission === "granted" ? (
+                  <p>Allowed Notification</p>
+                ) : (
+                  <p>Please Allow notification</p>
+                )}
+              </div>
+            </div>
+          </nav>
+        </div>
+
+        {selection === "home" ? (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {orders
+              .slice()
+              .reverse()
+              .map((order, index) => (
+                <div key={index}>
+                  {order.status !== "complete" && order.status !== "cancel" ? (
+                    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+                      {/* Status Banner */}
+                      <div
+                        className={`px-6 py-3 rounded-t-xl text-sm font-medium
                                                 ${
                                                   order.status === "process"
                                                     ? "bg-yellow-50 text-yellow-700 border-b border-yellow-100"
@@ -284,434 +340,444 @@ function Home() {
                                                     ? "bg-blue-50 text-blue-700 border-b border-blue-100"
                                                     : "bg-green-50 text-green-700 border-b border-green-100"
                                                 }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>Order #{order._id.slice(-6)}</span>
-                        <span className="inline-flex items-center">
-                          {{
-                            process: "🕒 Processing",
-                            granted: "👨‍🍳 Granted",
-                            cancel: "❌ Canceled",
-                            default: "✅ Completed",
-                          }[order.status] || (
-                            // Fallback for unexpected status values
-                            <span>Unknown Status</span>
-                          )}
-                        </span>
-                        {order.status === "process" ? (
-                          
-                          <div>
-                            {order.req && order.req === "cancel" ? (
-                        <div>
-                            <span class="relative flex h-3 w-3">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                        </span>
-                        <button
-                              onClick={() =>
-                                openModal("cancel", orders.length - index - 1)
-                              }
-                              type="button"
-                              className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-400 text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                            >
-                              Cancel
-                            </button>
-                        </div>
-                        
-                            ) : <button
-                            onClick={() =>
-                              openModal("cancel", orders.length - index - 1)
-                            }
-                            type="button"
-                            className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-400 text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                          >
-                            Cancel
-                          </button>}
-                            
-                          </div>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    {/* Customer Info */}
-                    <div className="p-6 border-b border-gray-100">
-                      <div className="flex items-center space-x-3 text-gray-700">
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                        </svg>
-                        <p className="text-sm">
-                          House {order.house}, Road {order.road}, Sector{" "}
-                          {order.sector}, Uttara
-                        </p>
-                      </div>
-                      <div className="mt-3 flex items-center space-x-3 text-gray-700">
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                          />
-                        </svg>
-                        <p className="text-sm font-medium">
-                          {order.phoneNumber}
-                        </p>
-                      </div>
-                      <div className="mt-3 flex items-center space-x-3 text-gray-700">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke-width="2"
-                          stroke="currentColor"
-                          class="w-6 h-6"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        <p className="text-sm font-medium">
-                          Order time: {order.date_time}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Order Items */}
-                    <div className="px-6 py-4 space-y-3">
-                      {order.orders.map((item, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-3 rounded-lg bg-gray-50"
-                        >
-                          <div className="flex-1">
-                            <h3 className="font-medium text-gray-900">
-                              {item.name}
-                            </h3>
-                            <div className="mt-1 flex items-center space-x-2">
-                              <span className="text-sm text-gray-600">
-                                {item.edited
-                                  ? item.selectedSize || item.size[0].size
-                                  : item.size[0].size}
-                              </span>
-                              <span className="text-gray-400">•</span>
-                              <span className="text-sm font-medium text-gray-900">
-                                ৳{item.price}
-                              </span>
-                              <span className="text-gray-400">•</span>
-                              <span className="text-sm text-gray-600">
-                                Qty: {item.quantity}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="px-6 py-4 space-y-3">
-                      <p>Net Total: {order.price}৳</p>
-                      <hr></hr>
-                      <p>Vat - 5.00%: {order.price * 0.05}৳</p>
-                      <p>Auto Round: {Math.round(order.price * 0.05)}৳</p>
-                      <hr></hr>
-                      <p>
-                        Gross Total:{" "}
-                        {order.price + Math.round(order.price * 0.05)}৳
-                      </p>
-                    </div>
-
-                    {/* Action Footer */}
-                    <div className="px-6 py-4 bg-gray-50 rounded-b-xl">
-                      {order.status === "process" ? (
-                        <button
-                          onClick={() =>
-                            openModal("accept", orders.length - index - 1)
-                          }
-                          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white 
-                   py-2 px-4 rounded-lg hover:from-blue-700 hover:to-blue-800 
-                   transition duration-200 font-medium"
-                        >
-                          Accept Order
-                        </button>
-                      ) : order.status === "granted" ? (
-                        <button
-                          onClick={() =>
-                            openModal("complete", orders.length - index - 1)
-                          }
-                          className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white 
-                   py-2 px-4 rounded-lg hover:from-green-700 hover:to-green-800 
-                   transition duration-200 font-medium"
-                        >
-                          Mark as Complete
-                        </button>
-                      ) : (
-                        <div className="text-center text-green-600 font-medium">
-                          ✨ Order Completed
-                        </div>
-                      )}
-
-                      {/* Confirmation Modal */}
-                      {isModalOpen && (
-                        <div
-                          className="fixed inset-0 z-50 overflow-y-auto"
-                          aria-modal="true"
-                        >
-                          {/* Overlay */}
-                          <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                            <div
-                              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                              onClick={closeModal}
-                              aria-hidden="true"
-                            />
-
-                            {/* Modal Content */}
-                            <div className="inline-block w-full max-w-xl transform overflow-hidden rounded-2xl bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:align-middle">
-                              {/* Close Button */}
-                              <button
-                                onClick={closeModal}
-                                className="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
-                              >
-                                <span className="sr-only">Close</span>
-                                <svg
-                                  className="h-6 w-6"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                  />
-                                </svg>
-                              </button>
-
-                              {/* Header Section */}
-                              <div className="px-6 pt-6 pb-4">
-                                <div className="flex items-start">
-                                  <div
-                                    className={`flex h-12 w-12 items-center justify-center rounded-full ${
-                                      modalType === "accept"
-                                        ? "bg-blue-100"
-                                        : modalType === "complete"
-                                        ? "bg-green-100"
-                                        : "bg-red-100"
-                                    }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>Order #{order._id.slice(-6)}</span>
+                          <span className="inline-flex items-center">
+                            {{
+                              process: "🕒 Processing",
+                              granted: "👨‍🍳 Granted",
+                              cancel: "❌ Canceled",
+                              default: "✅ Completed",
+                            }[order.status] || (
+                              // Fallback for unexpected status values
+                              <span>Unknown Status</span>
+                            )}
+                          </span>
+                          {order.status === "process" ? (
+                            <div>
+                              {order.req && order.req === "cancel" ? (
+                                <div>
+                                  <span className="relative flex h-3 w-3">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                  </span>
+                                  <button
+                                    onClick={() =>
+                                      openModal(
+                                        "cancel",
+                                        orders.length - index - 1
+                                      )
+                                    }
+                                    type="button"
+                                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-400 text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                   >
-                                    {modalType === "accept" ? (
-                                      <svg
-                                        className="h-6 w-6 text-blue-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth="2"
-                                          d="M5 13l4 4L19 7"
-                                        />
-                                      </svg>
-                                    ) : modalType === "complete" ? (
-                                      <svg
-                                        className="h-6 w-6 text-green-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth="2"
-                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                      </svg>
-                                    ) : (
-                                      <svg
-                                        className="h-6 w-6 text-red-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                      </svg>
-                                    )}
-                                  </div>
-                                  <div className="ml-4">
-                                    <h3 className="text-lg font-medium text-gray-900">
-                                      {modalType === "accept"
-                                        ? "Accept Order"
-                                        : modalType === "complete"
-                                        ? "Complete Order"
-                                        : "Cancel Order"}
-                                    </h3>
-
-                                    <p className="mt-1 text-sm text-gray-500">
-                                      Order #
-                                      {orders[selectedOrderIndex]?._id.slice(
-                                        -6
-                                      )}
-                                    </p>
-                                  </div>
+                                    Cancel
+                                  </button>
                                 </div>
-                              </div>
-
-                              {/* Order Details Section */}
-                              <div className="max-h-[60vh] overflow-y-auto px-6 py-4">
-                                {/* Customer Info */}
-                                <div className="rounded-lg bg-gray-50 p-4 mb-4">
-                                  <h4 className="text-sm font-medium text-gray-900 mb-3">
-                                    Customer Details
-                                  </h4>
-                                  <div className="space-y-2">
-                                    <div className="flex items-center text-sm text-gray-600">
-                                      <svg
-                                        className="h-5 w-5 mr-2"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth="2"
-                                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                                        />
-                                      </svg>
-                                      {orders[selectedOrderIndex]?.phoneNumber}
-                                    </div>
-                                    <div className="flex items-center text-sm text-gray-600">
-                                      <svg
-                                        className="h-5 w-5 mr-2"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth="2"
-                                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                        />
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth="2"
-                                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                        />
-                                      </svg>
-                                      House {orders[selectedOrderIndex]?.house},
-                                      Road {orders[selectedOrderIndex]?.road},
-                                      Sector{" "}
-                                      {orders[selectedOrderIndex]?.sector},
-                                      Uttara
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Order Items */}
-                                <div className="space-y-3">
-                                  <h4 className="text-sm font-medium text-gray-900">
-                                    Order Items
-                                  </h4>
-                                  {orders[selectedOrderIndex]?.orders.map(
-                                    (item, idx) => (
-                                      <div
-                                        key={idx}
-                                        className="flex justify-between p-3 bg-gray-50 rounded-lg"
-                                      >
-                                        <div>
-                                          <p className="font-medium text-gray-900">
-                                            {item.name}
-                                          </p>
-                                          <p className="text-sm text-gray-500">
-                                            {item.edited
-                                              ? item.selectedSize ||
-                                                item.size[0].size
-                                              : item.size[0].size}
-                                            • Qty: {item.quantity}
-                                          </p>
-                                        </div>
-                                        <p className="font-medium text-gray-900">
-                                          ৳{item.price * item.quantity}
-                                        </p>
-                                      </div>
-                                    )
-                                  )}
-                                </div>
-
-                                {/* Total Section */}
-                                <div className="mt-4 pt-4 border-t border-gray-200">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm text-gray-600">
-                                      Net Total
-                                    </span>
-                                    <span className="font-medium">
-                                      ৳{orders[selectedOrderIndex]?.price}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm text-gray-600">
-                                      VAT (5%)
-                                    </span>
-                                    <span className="text-sm">
-                                      ৳
-                                      {Math.round(
-                                        orders[selectedOrderIndex]?.price * 0.05
-                                      )}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center font-medium text-lg">
-                                    <span>Total Amount</span>
-                                    <span>
-                                      ৳
-                                      {orders[selectedOrderIndex]?.price +
-                                        Math.round(
-                                          orders[selectedOrderIndex]?.price *
-                                            0.05
-                                        )}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="bg-gray-50 px-6 py-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+                              ) : (
                                 <button
+                                  onClick={() =>
+                                    openModal(
+                                      "cancel",
+                                      orders.length - index - 1
+                                    )
+                                  }
                                   type="button"
-                                  onClick={closeModal}
-                                  className="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 
-                                           bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 
-                                           focus:outline-none sm:text-sm"
+                                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-400 text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
                                   Cancel
                                 </button>
+                              )}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      {/* Customer Info */}
+                      <div className="p-6 border-b border-gray-100">
+                        <div className="flex items-center space-x-3 text-gray-700">
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                          <p className="text-sm">
+                            House {order.house}, Road {order.road}, Sector{" "}
+                            {order.sector}, Uttara
+                          </p>
+                        </div>
+                        <div className="mt-3 flex items-center space-x-3 text-gray-700">
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                            />
+                          </svg>
+                          <p className="text-sm font-medium">
+                            {order.phoneNumber}
+                          </p>
+                        </div>
+                        <div className="mt-3 flex items-center space-x-3 text-gray-700">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="2"
+                            stroke="currentColor"
+                            className="w-6 h-6"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <p className="text-sm font-medium">
+                            Order time: {order.date_time}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Order Items */}
+                      <div className="px-6 py-4 space-y-3">
+                        {order.orders.map((item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 rounded-lg bg-gray-50"
+                          >
+                            <div className="flex-1">
+                              <h3 className="font-medium text-gray-900">
+                                {item.name}
+                              </h3>
+                              <div className="mt-1 flex items-center space-x-2">
+                                <span className="text-sm text-gray-600">
+                                  {item.edited
+                                    ? item.selectedSize || item.size[0].size
+                                    : item.size[0].size}
+                                </span>
+                                <span className="text-gray-400">•</span>
+                                <span className="text-sm font-medium text-gray-900">
+                                  ৳{item.price}
+                                </span>
+                                <span className="text-gray-400">•</span>
+                                <span className="text-sm text-gray-600">
+                                  Qty: {item.quantity}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="px-6 py-4 space-y-3">
+                        <p>Net Total: {order.price}৳</p>
+                        <hr></hr>
+                        <p>Vat - 5.00%: {order.price * 0.05}৳</p>
+                        <p>Auto Round: {Math.round(order.price * 0.05)}৳</p>
+                        <hr></hr>
+                        <p>
+                          Gross Total:{" "}
+                          {order.price + Math.round(order.price * 0.05)}৳
+                        </p>
+                      </div>
+
+                      {/* Action Footer */}
+                      <div className="px-6 py-4 bg-gray-50 rounded-b-xl">
+                        {order.status === "process" ? (
+                          <button
+                            onClick={() =>
+                              openModal("accept", orders.length - index - 1)
+                            }
+                            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white 
+                   py-2 px-4 rounded-lg hover:from-blue-700 hover:to-blue-800 
+                   transition duration-200 font-medium"
+                          >
+                            Accept Order
+                          </button>
+                        ) : order.status === "granted" ? (
+                          <button
+                            onClick={() =>
+                              openModal("complete", orders.length - index - 1)
+                            }
+                            className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white 
+                   py-2 px-4 rounded-lg hover:from-green-700 hover:to-green-800 
+                   transition duration-200 font-medium"
+                          >
+                            Mark as Complete
+                          </button>
+                        ) : (
+                          <div className="text-center text-green-600 font-medium">
+                            ✨ Order Completed
+                          </div>
+                        )}
+
+                        {/* Confirmation Modal */}
+                        {isModalOpen && (
+                          <div
+                            className="fixed inset-0 z-50 overflow-y-auto"
+                            aria-modal="true"
+                          >
+                            {/* Overlay */}
+                            <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                              <div
+                                className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                                onClick={closeModal}
+                                aria-hidden="true"
+                              />
+
+                              {/* Modal Content */}
+                              <div className="inline-block w-full max-w-xl transform overflow-hidden rounded-2xl bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:align-middle">
+                                {/* Close Button */}
                                 <button
-                                  type="button"
-                                  onClick={handleConfirm}
-                                  className={`w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent 
+                                  onClick={closeModal}
+                                  className="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
+                                >
+                                  <span className="sr-only">Close</span>
+                                  <svg
+                                    className="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="2"
+                                      d="M6 18L18 6M6 6l12 12"
+                                    />
+                                  </svg>
+                                </button>
+
+                                {/* Header Section */}
+                                <div className="px-6 pt-6 pb-4">
+                                  <div className="flex items-start">
+                                    <div
+                                      className={`flex h-12 w-12 items-center justify-center rounded-full ${
+                                        modalType === "accept"
+                                          ? "bg-blue-100"
+                                          : modalType === "complete"
+                                          ? "bg-green-100"
+                                          : "bg-red-100"
+                                      }`}
+                                    >
+                                      {modalType === "accept" ? (
+                                        <svg
+                                          className="h-6 w-6 text-blue-600"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M5 13l4 4L19 7"
+                                          />
+                                        </svg>
+                                      ) : modalType === "complete" ? (
+                                        <svg
+                                          className="h-6 w-6 text-green-600"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                          />
+                                        </svg>
+                                      ) : (
+                                        <svg
+                                          className="h-6 w-6 text-red-600"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                      )}
+                                    </div>
+                                    <div className="ml-4">
+                                      <h3 className="text-lg font-medium text-gray-900">
+                                        {modalType === "accept"
+                                          ? "Accept Order"
+                                          : modalType === "complete"
+                                          ? "Complete Order"
+                                          : "Cancel Order"}
+                                      </h3>
+
+                                      <p className="mt-1 text-sm text-gray-500">
+                                        Order #
+                                        {orders[selectedOrderIndex]?._id.slice(
+                                          -6
+                                        )}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Order Details Section */}
+                                <div className="max-h-[60vh] overflow-y-auto px-6 py-4">
+                                  {/* Customer Info */}
+                                  <div className="rounded-lg bg-gray-50 p-4 mb-4">
+                                    <h4 className="text-sm font-medium text-gray-900 mb-3">
+                                      Customer Details
+                                    </h4>
+                                    <div className="space-y-2">
+                                      <div className="flex items-center text-sm text-gray-600">
+                                        <svg
+                                          className="h-5 w-5 mr-2"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                          />
+                                        </svg>
+                                        {
+                                          orders[selectedOrderIndex]
+                                            ?.phoneNumber
+                                        }
+                                      </div>
+                                      <div className="flex items-center text-sm text-gray-600">
+                                        <svg
+                                          className="h-5 w-5 mr-2"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                          />
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                          />
+                                        </svg>
+                                        House{" "}
+                                        {orders[selectedOrderIndex]?.house},
+                                        Road {orders[selectedOrderIndex]?.road},
+                                        Sector{" "}
+                                        {orders[selectedOrderIndex]?.sector},
+                                        Uttara
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Order Items */}
+                                  <div className="space-y-3">
+                                    <h4 className="text-sm font-medium text-gray-900">
+                                      Order Items
+                                    </h4>
+                                    {orders[selectedOrderIndex]?.orders.map(
+                                      (item, idx) => (
+                                        <div
+                                          key={idx}
+                                          className="flex justify-between p-3 bg-gray-50 rounded-lg"
+                                        >
+                                          <div>
+                                            <p className="font-medium text-gray-900">
+                                              {item.name}
+                                            </p>
+                                            <p className="text-sm text-gray-500">
+                                              {item.edited
+                                                ? item.selectedSize ||
+                                                  item.size[0].size
+                                                : item.size[0].size}
+                                              • Qty: {item.quantity}
+                                            </p>
+                                          </div>
+                                          <p className="font-medium text-gray-900">
+                                            ৳{item.price * item.quantity}
+                                          </p>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+
+                                  {/* Total Section */}
+                                  <div className="mt-4 pt-4 border-t border-gray-200">
+                                    <div className="flex justify-between items-center mb-2">
+                                      <span className="text-sm text-gray-600">
+                                        Net Total
+                                      </span>
+                                      <span className="font-medium">
+                                        ৳{orders[selectedOrderIndex]?.price}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center mb-2">
+                                      <span className="text-sm text-gray-600">
+                                        VAT (5%)
+                                      </span>
+                                      <span className="text-sm">
+                                        ৳
+                                        {Math.round(
+                                          orders[selectedOrderIndex]?.price *
+                                            0.05
+                                        )}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center font-medium text-lg">
+                                      <span>Total Amount</span>
+                                      <span>
+                                        ৳
+                                        {orders[selectedOrderIndex]?.price +
+                                          Math.round(
+                                            orders[selectedOrderIndex]?.price *
+                                              0.05
+                                          )}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="bg-gray-50 px-6 py-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+                                  <button
+                                    type="button"
+                                    onClick={closeModal}
+                                    className="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 
+                                           bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 
+                                           focus:outline-none sm:text-sm"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={handleConfirm}
+                                    className={`w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent 
               px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none sm:text-sm
               ${
                 modalType === "accept"
@@ -720,22 +786,241 @@ function Home() {
                   ? "bg-green-600 hover:bg-green-700"
                   : "bg-red-600 hover:bg-red-700"
               }`}
-                                >
-                                  {modalType === "cancel"
-                                    ? "Confirm Cancellation"
-                                    : "Confirm"}
-                                </button>
+                                  >
+                                    {modalType === "cancel"
+                                      ? "Confirm Cancellation"
+                                      : "Confirm"}
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ) : null}
-              </div>
-            ))}
-        </div>
+                  ) : null}
+                </div>
+              ))}
+          </div>
+        ) : (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {orders
+              .slice()
+              .reverse()
+              .map((order, index) => (
+                <div>
+                  {order.status === "complete" || order.status === "cancel" ? (
+                    <div
+                      key={index}
+                      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
+                    >
+                      {/* Status Banner */}
+                      <div
+                        className={`px-6 py-3 rounded-t-xl text-sm font-medium
+                ${
+                  order.status === "process"
+                    ? "bg-yellow-50 text-yellow-700 border-b border-yellow-100"
+                    : order.status === "granted"
+                    ? "bg-blue-50 text-blue-700 border-b border-blue-100"
+                    : "bg-green-50 text-green-700 border-b border-green-100"
+                }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>Order #{order._id.slice(-6)}</span>
+                          <span className="inline-flex items-center">
+                            {order.status === "process"
+                              ? "🕒"
+                              : order.status === "granted"
+                              ? "👨‍🍳"
+                              : order.status === "cancel"
+                              ? "❌"
+                              : "✅"}
+                            {order.status.charAt(0).toUpperCase() +
+                              order.status.slice(1)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Customer Info */}
+                      <div className="p-6 border-b border-gray-100">
+                        <div className="flex items-center space-x-3 text-gray-700">
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                          <p className="text-sm">
+                            House {order.house}, Road {order.road}, Sector{" "}
+                            {order.sector}, Uttara
+                          </p>
+                        </div>
+                        <div className="mt-3 flex items-center space-x-3 text-gray-700">
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                            />
+                          </svg>
+                          <p className="text-sm font-medium">
+                            {order.phoneNumber}
+                          </p>
+                        </div>
+                        <div className="mt-3 flex items-center space-x-3 text-gray-700">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="2"
+                            stroke="currentColor"
+                            className="w-6 h-6"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <p className="text-sm font-medium">
+                            Order time: {order.date_time}
+                          </p>
+                        </div>
+                        <div className="mt-3 flex items-center space-x-3 text-gray-700">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="2"
+                            stroke="currentColor"
+                            className="w-6 h-6"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <p className="text-sm font-medium">
+                            {order.status === "complete" ? (
+                              <p>
+                                Order complete time: {order.orderCompleteTime}
+                              </p>
+                            ) : (
+                              <p>
+                                Order cancel time: {order.orderCompleteTime}
+                              </p>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Order Items */}
+                      <div className="px-6 py-4 space-y-3">
+                        {order.orders.map((item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 rounded-lg bg-gray-50"
+                          >
+                            <div className="flex-1">
+                              <h3 className="font-medium text-gray-900">
+                                {item.name}
+                              </h3>
+                              <div className="mt-1 flex items-center space-x-2">
+                                <span className="text-sm text-gray-600">
+                                  {item.edited
+                                    ? item.selectedSize || item.size[0].size
+                                    : item.size[0].size}
+                                </span>
+                                <span className="text-gray-400">•</span>
+                                <span className="text-sm font-medium text-gray-900">
+                                  ৳{item.price}
+                                </span>
+                                <span className="text-gray-400">•</span>
+                                <span className="text-sm text-gray-600">
+                                  Qty: {item.quantity}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="px-6 py-4 space-y-3">
+                        <p>Net Total: {order.price}৳</p>
+                        <hr></hr>
+                        <p>Vat - 5.00%: {order.price * 0.05}৳</p>
+                        <p>Auto Round: {Math.round(order.price * 0.05)}৳</p>
+                        <hr></hr>
+                        <p>
+                          Gross Total:{" "}
+                          {order.price + Math.round(order.price * 0.05)}৳
+                        </p>
+                      </div>
+
+                      {/* Action Footer */}
+                      <div className="px-6 py-4 bg-gray-50 rounded-b-xl">
+                        {order.status === "complete" ? (
+                          <div className="text-center text-green-600 font-medium">
+                            ✨ Order Completed
+                          </div>
+                        ) : (
+                          <div className="text-center text-green-600 font-medium">
+                            ❌ Order Canceled
+                          </div>
+                        )}
+                        {/* {order.status === "process" ? (
+                        <button
+                          onClick={() => grantOrder(orders.length - index - 1)}
+                          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white 
+                             py-2 px-4 rounded-lg hover:from-blue-700 hover:to-blue-800 
+                             transition duration-200 font-medium"
+                        >
+                          Accept Order
+                        </button>
+                      ) : order.status === "granted" ? (
+                        <button
+                          onClick={() =>
+                            completeOrder(orders.length - index - 1)
+                          }
+                          className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white 
+                             py-2 px-4 rounded-lg hover:from-green-700 hover:to-green-800 
+                             transition duration-200 font-medium"
+                        >
+                          Mark as Complete
+                        </button>
+                      ) : (
+                        <div className="text-center text-green-600 font-medium">
+                          ✨ Order Completed
+                        </div>
+                      )} */}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+          </div>
+        )}
+
+        {/* Orders Grid */}
       </div>
     </div>
   );

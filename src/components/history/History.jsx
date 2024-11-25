@@ -204,7 +204,7 @@ function History() {
                           viewBox="0 0 24 24"
                           stroke-width="2"
                           stroke="currentColor"
-                          class="w-6 h-6"
+                          className="w-6 h-6"
                         >
                           <path
                             stroke-linecap="round"
@@ -223,7 +223,7 @@ function History() {
                           viewBox="0 0 24 24"
                           stroke-width="2"
                           stroke="currentColor"
-                          class="w-6 h-6"
+                          className="w-6 h-6"
                         >
                           <path
                             stroke-linecap="round"
